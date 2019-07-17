@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const authConfig = require('../../config/auth')
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -22,7 +24,10 @@ const UserSchema = new mongoose.Schema({
   }
 })
 
-// Hook para criptografar a senha
+/**
+ * Hook para criptografar a senha
+ * Executa antes do método SAVE do mongoose (inclusão ou alteração)
+ */
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next()
@@ -30,5 +35,24 @@ UserSchema.pre('save', async function (next) {
 
   this.password = await bcrypt.hash(this.password, 8)
 })
+
+/**
+ * Adicionando métodos à instância do model
+ */
+UserSchema.methods = {
+  // Comparação de senhas criptografadas
+  compareHash (password) {
+    return bcrypt.compare(password, this.password)
+  }
+}
+
+/**
+ * Métodos estáticos disparados diretamente pelo model
+ */
+UserSchema.statics = {
+  generateToken ({ id }) {
+    return jwt.sign({ id }, authConfig.secret, { expiresIn: authConfig.ttl })
+  }
+}
 
 module.exports = mongoose.model('User', UserSchema)
