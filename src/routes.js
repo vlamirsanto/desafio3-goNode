@@ -14,7 +14,7 @@ routes.get('/token', authMiddleware, (req, res) => res.json({ ok: true }))
 routes.use(authMiddleware)
 routes.get('/ads', controllers.AdController.index)
 routes.get('/ads/:id', controllers.AdController.show)
-routes.post('/ads', authMiddleware, controllers.AdController.store)
+routes.post('/ads', controllers.AdController.store)
 routes.put('/ads/:id', controllers.AdController.update)
 routes.delete('/ads/:id', controllers.AdController.destroy)
 
