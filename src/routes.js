@@ -1,13 +1,21 @@
 const express = require('express')
-const UserController = require('./app/controllers/UserController')
-const SessionsController = require('./app/controllers/SessionController')
-
-const authMiddleware = require('./app/middlewares/auth')
-
 const routes = express.Router()
 
-routes.post('/users', UserController.save)
-routes.post('/sessions', SessionsController.save)
+// Importando os controllers pelo pacote "require-dir"
+const controllers = require('./app/controllers')
+
+// Middlewares
+const authMiddleware = require('./app/middlewares/auth')
+
+routes.post('/users', controllers.UserController.save)
+routes.post('/sessions', controllers.SessionController.save)
 routes.get('/token', authMiddleware, (req, res) => res.json({ ok: true }))
+
+routes.use(authMiddleware)
+routes.get('/ads', controllers.AdController.index)
+routes.get('/ads/:id', controllers.AdController.show)
+routes.post('/ads', authMiddleware, controllers.AdController.store)
+routes.put('/ads/:id', controllers.AdController.update)
+routes.delete('/ads/:id', controllers.AdController.destroy)
 
 module.exports = routes
